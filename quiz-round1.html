@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Round 1 — All Topics Quiz</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --accent: #7c6af7;
+      --accent2: #5ee7b7;
+      --red: #ff5e7a;
+      --green: #4ade80;
+      --yellow: #fbbf24;
+      --text: #e8eaf6;
+      --muted: #8b90b0;
+      --border: #2e3250;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      padding: 40px 20px 80px;
+    }
+
+    .container {
+      max-width: 820px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    header .badge {
+      display: inline-block;
+      background: var(--accent);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 4px 14px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+    header h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #a78bfa, var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+    header p {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    /* Progress bar */
+    .progress-wrap {
+      background: var(--surface2);
+      border-radius: 99px;
+      height: 6px;
+      margin-bottom: 48px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 99px;
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+
+    /* Section labels */
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 24px;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* Question card */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      margin-bottom: 20px;
+      transition: border-color 0.3s;
+    }
+    .card.answered { border-color: var(--accent); }
+    .card.correct  { border-color: var(--green); background: #0a1f15; }
+    .card.wrong    { border-color: var(--red);   background: #1f0a12; }
+
+    .q-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .q-num {
+      background: var(--accent);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 99px;
+    }
+    .q-topic {
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .q-status {
+      margin-left: auto;
+      font-size: 1.2rem;
+      display: none;
+    }
+
+    .q-text {
+      font-size: 1rem;
+      line-height: 1.65;
+      color: var(--text);
+      margin-bottom: 20px;
+    }
+    .q-text em {
+      color: var(--accent2);
+      font-style: italic;
+    }
+    .q-text blockquote {
+      border-left: 3px solid var(--accent);
+      padding: 10px 16px;
+      margin: 12px 0;
+      background: var(--surface2);
+      border-radius: 0 8px 8px 0;
+      font-style: italic;
+      color: #c5cae9;
+      font-size: 0.95rem;
+      line-height: 1.7;
+    }
+
+    /* Options */
+    .options { display: flex; flex-direction: column; gap: 10px; }
+
+    .option {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    .option:hover { border-color: var(--accent); background: #1e2140; }
+    .option.selected { border-color: var(--accent); background: #1c1a40; }
+    .option.correct-opt { border-color: var(--green) !important; background: #0a2010 !important; }
+    .option.wrong-opt   { border-color: var(--red)   !important; background: #200a10 !important; }
+    .option.reveal-correct { border-color: var(--green) !important; background: #0a2010 !important; }
+
+    .opt-letter {
+      min-width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--border);
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .option.selected .opt-letter { background: var(--accent); color: white; }
+    .option.correct-opt .opt-letter { background: var(--green); color: #000; }
+    .option.wrong-opt .opt-letter   { background: var(--red);   color: white; }
+    .option.reveal-correct .opt-letter { background: var(--green); color: #000; }
+
+    .opt-text { font-size: 0.93rem; line-height: 1.5; padding-top: 3px; }
+
+    /* Feedback box */
+    .feedback {
+      margin-top: 16px;
+      padding: 14px 16px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      display: none;
+    }
+    .feedback.show { display: block; }
+    .feedback.correct-fb { background: #0a2010; border: 1px solid var(--green); color: #86efac; }
+    .feedback.wrong-fb   { background: #20080e; border: 1px solid var(--red);   color: #fda4af; }
+
+    /* Confirm MCQ button */
+    .btn-confirm {
+      margin-top: 16px;
+      padding: 10px 24px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      display: none;
+    }
+    .btn-confirm:hover { opacity: 0.85; }
+    .btn-confirm.visible { display: inline-block; }
+
+    /* Textarea / subjective */
+    .subj-label {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    textarea {
+      width: 100%;
+      min-height: 160px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.93rem;
+      line-height: 1.7;
+      padding: 14px;
+      resize: vertical;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+    textarea:focus { outline: none; border-color: var(--accent); }
+
+    .word-count {
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-align: right;
+      margin-top: 6px;
+    }
+    .word-count.over { color: var(--yellow); }
+
+    /* Rubric table */
+    .rubric {
+      margin-top: 20px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      font-size: 0.85rem;
+    }
+    .rubric-title {
+      background: var(--surface2);
+      padding: 10px 14px;
+      font-weight: 700;
+      color: var(--accent2);
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .rubric table { width: 100%; border-collapse: collapse; }
+    .rubric td { padding: 10px 14px; border-top: 1px solid var(--border); vertical-align: top; line-height: 1.5; }
+    .rubric td:first-child { white-space: nowrap; font-weight: 700; color: var(--accent2); width: 60px; }
+
+    /* Submit */
+    .submit-wrap {
+      text-align: center;
+      margin-top: 40px;
+    }
+    .btn-submit {
+      padding: 14px 48px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #0f1117;
+      border: none;
+      border-radius: 99px;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: transform 0.2s, opacity 0.2s;
+    }
+    .btn-submit:hover { transform: translateY(-2px); opacity: 0.9; }
+    .btn-submit:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    /* Scoreboard */
+    #scoreboard {
+      display: none;
+      margin-top: 40px;
+      background: var(--surface);
+      border: 1px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 32px;
+      text-align: center;
+    }
+    #scoreboard h2 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #a78bfa, var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .score-ring {
+      width: 120px;
+      height: 120px;
+      margin: 20px auto;
+      position: relative;
+    }
+    .score-ring svg { transform: rotate(-90deg); }
+    .score-ring .ring-bg { fill: none; stroke: var(--border); stroke-width: 10; }
+    .score-ring .ring-fill {
+      fill: none;
+      stroke: url(#grad);
+      stroke-width: 10;
+      stroke-linecap: round;
+      stroke-dasharray: 283;
+      stroke-dashoffset: 283;
+      transition: stroke-dashoffset 1s ease;
+    }
+    .score-text {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+    .score-breakdown {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      margin: 24px 0;
+      flex-wrap: wrap;
+    }
+    .score-item { text-align: center; }
+    .score-item .val { font-size: 1.5rem; font-weight: 800; }
+    .score-item .lbl { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+    .score-item.green .val { color: var(--green); }
+    .score-item.red .val   { color: var(--red); }
+    .score-item.yellow .val { color: var(--yellow); }
+
+    .subj-pending {
+      margin-top: 16px;
+      padding: 12px 18px;
+      background: var(--surface2);
+      border-radius: 8px;
+      font-size: 0.88rem;
+      color: var(--yellow);
+      border: 1px solid var(--yellow);
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      header h1 { font-size: 1.5rem; }
+      .card { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <header>
+    <div class="badge">Round 1</div>
+    <h1>All Topics Mixed Quiz</h1>
+    <p>5 MCQs + 1 Subjective &nbsp;·&nbsp; Biography · Symbolism · Sentences · Technique · PEEL</p>
+  </header>
+
+  <!-- Progress -->
+  <div class="progress-wrap">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <!-- PART A -->
+  <div class="section-label">Part A — Multiple Choice</div>
+
+  <!-- Q1 -->
+  <div class="card" id="card-q1">
+    <div class="q-meta">
+      <span class="q-num">Q1</span>
+      <span class="q-topic">Biography</span>
+      <span class="q-status" id="status-q1"></span>
+    </div>
+    <div class="q-text">
+      The Barkhad Abdi biography opens with: <em>"Born in Mogadishu, Somalia, on April 10, 1985, Barkhad Abdi earned wide acclaim for his first film role in Captain Phillips (2013)."</em><br><br>
+      Why does the writer begin this way?
+    </div>
+    <div class="options" id="opts-q1">
+      <div class="option" data-q="q1" data-val="A" onclick="selectOpt(this)">
+        <span class="opt-letter">A</span>
+        <span class="opt-text">To immediately establish how famous Barkhad Abdi became</span>
+      </div>
+      <div class="option" data-q="q1" data-val="B" onclick="selectOpt(this)">
+        <span class="opt-letter">B</span>
+        <span class="opt-text">To follow the convention of anchoring the reader in the subject's origins through chronological structure</span>
+      </div>
+      <div class="option" data-q="q1" data-val="C" onclick="selectOpt(this)">
+        <span class="opt-letter">C</span>
+        <span class="opt-text">To contrast his humble birthplace with his Hollywood success</span>
+      </div>
+      <div class="option" data-q="q1" data-val="D" onclick="selectOpt(this)">
+        <span class="opt-letter">D</span>
+        <span class="opt-text">To provide factual detail that makes the biography more entertaining</span>
+      </div>
+    </div>
+    <button class="btn-confirm" id="confirm-q1" onclick="confirmAnswer('q1','B','<strong>Correct.</strong> Opening with birth date and place is a <em>convention</em> of biography — it uses chronological structure to ground the reader in where and when the subject\'s story began. A and C might feel partly true, but they describe <em>effects</em>, not the <em>convention</em> being demonstrated. D is off — chronological structure, not entertainment, is the reason.')">Confirm Answer</button>
+    <div class="feedback" id="fb-q1"></div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="card" id="card-q2">
+    <div class="q-meta">
+      <span class="q-num">Q2</span>
+      <span class="q-topic">Symbolism — The Road Not Taken</span>
+      <span class="q-status" id="status-q2"></span>
+    </div>
+    <div class="q-text">
+      In <em>The Road Not Taken</em>, Frost writes: <em>"Though as for that the passing there / Had worn them really about the same."</em><br><br>
+      A student claims: <em>"The poem is about always choosing the unusual path and being different."</em> Why is this reading <strong>incomplete</strong>?
+    </div>
+    <div class="options" id="opts-q2">
+      <div class="option" data-q="q2" data-val="A" onclick="selectOpt(this)">
+        <span class="opt-letter">A</span>
+        <span class="opt-text">Because the poem is only about autumn and nature, not choices</span>
+      </div>
+      <div class="option" data-q="q2" data-val="B" onclick="selectOpt(this)">
+        <span class="opt-letter">B</span>
+        <span class="opt-text">Because both roads are described as equally worn — the speaker cannot actually tell which is less travelled</span>
+      </div>
+      <div class="option" data-q="q2" data-val="C" onclick="selectOpt(this)">
+        <span class="opt-letter">C</span>
+        <span class="opt-text">Because Frost never uses the word "different" in the poem</span>
+      </div>
+      <div class="option" data-q="q2" data-val="D" onclick="selectOpt(this)">
+        <span class="opt-letter">D</span>
+        <span class="opt-text">Because the speaker expresses clear regret about the choice made</span>
+      </div>
+    </div>
+    <button class="btn-confirm" id="confirm-q2" onclick="confirmAnswer('q2','B','<strong>Correct.</strong> The key to the poem\'s complexity is that line — both roads are equally worn. The speaker <em>cannot</em> truly know which was less travelled. The famous final lines are said with a future sigh, suggesting the speaker will <em>construct</em> a story about their choice rather than it being objectively true. The common reading (always be different!) misses this irony entirely.')">Confirm Answer</button>
+    <div class="feedback" id="fb-q2"></div>
+  </div>
+
+  <!-- Q3 -->
+  <div class="card" id="card-q3">
+    <div class="q-meta">
+      <span class="q-num">Q3</span>
+      <span class="q-topic">Sentence Types</span>
+      <span class="q-status" id="status-q3"></span>
+    </div>
+    <div class="q-text">
+      Which sentence below is a <strong>compound-complex</strong> sentence?
+    </div>
+    <div class="options" id="opts-q3">
+      <div class="option" data-q="q3" data-val="A" onclick="selectOpt(this)">
+        <span class="opt-letter">A</span>
+        <span class="opt-text">Although she was tired, she finished her homework.</span>
+      </div>
+      <div class="option" data-q="q3" data-val="B" onclick="selectOpt(this)">
+        <span class="opt-letter">B</span>
+        <span class="opt-text">She finished her homework, and she went to sleep.</span>
+      </div>
+      <div class="option" data-q="q3" data-val="C" onclick="selectOpt(this)">
+        <span class="opt-letter">C</span>
+        <span class="opt-text">Although she was tired, she finished her homework, and she went to sleep early.</span>
+      </div>
+      <div class="option" data-q="q3" data-val="D" onclick="selectOpt(this)">
+        <span class="opt-letter">D</span>
+        <span class="opt-text">She was tired but finished her homework quickly.</span>
+      </div>
+    </div>
+    <button class="btn-confirm" id="confirm-q3" onclick="confirmAnswer('q3','C','<strong>Correct.</strong> Compound-complex = at least 2 independent clauses + at least 1 dependent clause. C has: <em>dependent</em> (Although she was tired) + <em>independent</em> (she finished her homework) + <em>independent</em> (she went to sleep early). A = complex only (1 IC + 1 DC). B = compound only (2 IC joined by \"and\"). D = simple sentence with a compound predicate.')">Confirm Answer</button>
+    <div class="feedback" id="fb-q3"></div>
+  </div>
+
+  <!-- Q4 -->
+  <div class="card" id="card-q4">
+    <div class="q-meta">
+      <span class="q-num">Q4</span>
+      <span class="q-topic">Writer's Technique</span>
+      <span class="q-status" id="status-q4"></span>
+    </div>
+    <div class="q-text">
+      The Barkhad Abdi biography includes his direct words: <em>"I witnessed the war's beginning, which was really extraordinarily crazy."</em><br><br>
+      What is the <strong>primary</strong> effect of including this direct quote in a biography?
+    </div>
+    <div class="options" id="opts-q4">
+      <div class="option" data-q="q4" data-val="A" onclick="selectOpt(this)">
+        <span class="opt-letter">A</span>
+        <span class="opt-text">It proves Abdi is a trustworthy and reliable person</span>
+      </div>
+      <div class="option" data-q="q4" data-val="B" onclick="selectOpt(this)">
+        <span class="opt-letter">B</span>
+        <span class="opt-text">It makes the text informal and therefore easier to read</span>
+      </div>
+      <div class="option" data-q="q4" data-val="C" onclick="selectOpt(this)">
+        <span class="opt-letter">C</span>
+        <span class="opt-text">It preserves the subject's authentic voice and adds personal credibility to the account</span>
+      </div>
+      <div class="option" data-q="q4" data-val="D" onclick="selectOpt(this)">
+        <span class="opt-letter">D</span>
+        <span class="opt-text">It shows the writer personally agrees with Abdi's view of the war</span>
+      </div>
+    </div>
+    <button class="btn-confirm" id="confirm-q4" onclick="confirmAnswer('q4','C','<strong>Correct.</strong> In biography, direct quotes serve to preserve the <em>authentic voice</em> of the subject — the reader hears the person speak, which creates intimacy and credibility. Note: the informal phrasing (\"really extraordinarily crazy\") is a clue — it sounds like a real person talking, not a polished narrator. A is about character, not technique. D is the opposite — it\'s the subject\'s voice, not the writer\'s opinion.')">Confirm Answer</button>
+    <div class="feedback" id="fb-q4"></div>
+  </div>
+
+  <!-- Q5 -->
+  <div class="card" id="card-q5">
+    <div class="q-meta">
+      <span class="q-num">Q5</span>
+      <span class="q-topic">Persuasive Speech / PEEL</span>
+      <span class="q-status" id="status-q5"></span>
+    </div>
+    <div class="q-text">
+      A student writes this paragraph:<br><br>
+      <blockquote>"Students should have more sports time. Exercise improves physical fitness. Therefore, schools should increase sports in the timetable."</blockquote>
+      Which part of PEEL is <strong>missing</strong>?
+    </div>
+    <div class="options" id="opts-q5">
+      <div class="option" data-q="q5" data-val="A" onclick="selectOpt(this)">
+        <span class="opt-letter">A</span>
+        <span class="opt-text">Point — the opinion isn't clear enough</span>
+      </div>
+      <div class="option" data-q="q5" data-val="B" onclick="selectOpt(this)">
+        <span class="opt-letter">B</span>
+        <span class="opt-text">Evidence and Explanation — there is no specific example or development of the reason</span>
+      </div>
+      <div class="option" data-q="q5" data-val="C" onclick="selectOpt(this)">
+        <span class="opt-letter">C</span>
+        <span class="opt-text">Link — the paragraph doesn't connect back to the topic</span>
+      </div>
+      <div class="option" data-q="q5" data-val="D" onclick="selectOpt(this)">
+        <span class="opt-letter">D</span>
+        <span class="opt-text">Formal language — the tone is too informal for a persuasive paragraph</span>
+      </div>
+    </div>
+    <button class="btn-confirm" id="confirm-q5" onclick="confirmAnswer('q5','B','<strong>Correct.</strong> The paragraph has a clear <em>Point</em> (students should have more sports) and a <em>Link</em> (therefore, schools should...). What\'s missing is <em>Evidence</em> (a specific statistic, study, or example) and <em>Explanation</em> (a developed chain of reasoning connecting the evidence back to the point). Without E+E, the argument is just assertion.')">Confirm Answer</button>
+    <div class="feedback" id="fb-q5"></div>
+  </div>
+
+  <!-- PART B -->
+  <div class="section-label" style="margin-top:40px;">Part B — Subjective Response</div>
+
+  <div class="card" id="card-q6">
+    <div class="q-meta">
+      <span class="q-num">Q6</span>
+      <span class="q-topic">Biography Conventions</span>
+    </div>
+    <div class="q-text">
+      Read this extract from the Barkhad Abdi biography:
+      <blockquote>
+        "Born in Mogadishu, Somalia, on April 10, 1985, Barkhad Abdi earned wide acclaim for his first film role in <em>Captain Phillips</em> (2013). He is the son of a teacher, but he was unable to attend primary school because of the civil war... Winning a green card lottery allowed him to move to the United States... He was nominated for both a Golden Globe and an Oscar — an impressive feat for a first-time actor."
+      </blockquote>
+      <strong>Task:</strong> Identify <strong>two conventions of biography</strong> used in this extract. For each one, quote from the text and explain the effect it has on the reader. <em>(80–100 words)</em>
+    </div>
+
+    <div class="subj-label">Your response:</div>
+    <textarea id="subj-answer" placeholder="Write your response here..." oninput="updateWordCount()"></textarea>
+    <div class="word-count" id="wordCount">0 / 80–100 words</div>
+
+    <div class="rubric">
+      <div class="rubric-title">Rubric</div>
+      <table>
+        <tr><td>4/4</td><td>Names 2 accurate conventions; specific quote for each; clear explanation of the effect on the reader</td></tr>
+        <tr><td>3/4</td><td>Names 2 conventions; quotes present; effect explained for only one</td></tr>
+        <tr><td>2/4</td><td>Names 2 conventions; vague or missing quotes; little explanation of effect</td></tr>
+        <tr><td>1/4</td><td>Only 1 convention identified; no quote; no effect explained</td></tr>
+        <tr><td>0/4</td><td>Irrelevant or no response</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- Submit -->
+  <div class="submit-wrap">
+    <button class="btn-submit" id="submitBtn" onclick="submitQuiz()">Submit Quiz</button>
+  </div>
+
+  <!-- Scoreboard -->
+  <div id="scoreboard">
+    <h2>Quiz Complete</h2>
+    <p style="color:var(--muted); font-size:0.9rem; margin-top:4px;">MCQ results are instant · Subjective will be reviewed</p>
+
+    <div class="score-ring">
+      <svg width="120" height="120" viewBox="0 0 100 100">
+        <defs>
+          <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#7c6af7"/>
+            <stop offset="100%" style="stop-color:#5ee7b7"/>
+          </linearGradient>
+        </defs>
+        <circle class="ring-bg" cx="50" cy="50" r="45"/>
+        <circle class="ring-fill" id="ringFill" cx="50" cy="50" r="45"/>
+      </svg>
+      <div class="score-text" id="scoreText">0/5</div>
+    </div>
+
+    <div class="score-breakdown">
+      <div class="score-item green">
+        <div class="val" id="scoreCorrect">0</div>
+        <div class="lbl">Correct</div>
+      </div>
+      <div class="score-item red">
+        <div class="val" id="scoreWrong">0</div>
+        <div class="lbl">Incorrect</div>
+      </div>
+      <div class="score-item yellow">
+        <div class="val">+4</div>
+        <div class="lbl">Pts available (Q6)</div>
+      </div>
+    </div>
+
+    <div class="subj-pending" id="subjPending"></div>
+  </div>
+
+</div>
+
+<script>
+  const ANSWERS = { q1:'B', q2:'B', q3:'C', q4:'C', q5:'B' };
+  const selected = {};
+  const confirmed = {};
+
+  function selectOpt(el) {
+    const q = el.dataset.q;
+    if (confirmed[q]) return;
+
+    document.querySelectorAll(`[data-q="${q}"]`).forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    selected[q] = el.dataset.val;
+
+    const btn = document.getElementById(`confirm-${q}`);
+    btn.classList.add('visible');
+    updateProgress();
+  }
+
+  function confirmAnswer(q, correct, explanation) {
+    if (confirmed[q]) return;
+    confirmed[q] = true;
+
+    const chosen = selected[q];
+    const card = document.getElementById(`card-${q}`);
+    const fb = document.getElementById(`fb-${q}`);
+    const status = document.getElementById(`status-${q}`);
+    const btn = document.getElementById(`confirm-${q}`);
+    btn.style.display = 'none';
+
+    // Lock all options
+    document.querySelectorAll(`[data-q="${q}"]`).forEach(o => {
+      o.style.cursor = 'default';
+      o.onclick = null;
+    });
+
+    if (chosen === correct) {
+      card.classList.add('correct');
+      document.querySelector(`[data-q="${q}"][data-val="${chosen}"]`).classList.add('correct-opt');
+      fb.className = 'feedback show correct-fb';
+      fb.innerHTML = '✅ ' + explanation;
+      status.textContent = '✅';
+    } else {
+      card.classList.add('wrong');
+      document.querySelector(`[data-q="${q}"][data-val="${chosen}"]`).classList.add('wrong-opt');
+      document.querySelector(`[data-q="${q}"][data-val="${correct}"]`).classList.add('reveal-correct');
+      fb.className = 'feedback show wrong-fb';
+      fb.innerHTML = `❌ You chose <strong>${chosen}</strong>. The correct answer is <strong>${correct}</strong>. ${explanation}`;
+      status.textContent = '❌';
+    }
+    status.style.display = 'inline';
+    updateProgress();
+  }
+
+  function updateWordCount() {
+    const text = document.getElementById('subj-answer').value.trim();
+    const words = text ? text.split(/\s+/).length : 0;
+    const el = document.getElementById('wordCount');
+    el.textContent = `${words} / 80–100 words`;
+    el.className = 'word-count' + (words > 100 ? ' over' : '');
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const mcqDone = Object.keys(confirmed).length;
+    const subjDone = document.getElementById('subj-answer').value.trim().length > 10 ? 1 : 0;
+    const total = 6;
+    const done = mcqDone + subjDone;
+    document.getElementById('progressBar').style.width = `${(done / total) * 100}%`;
+  }
+
+  function submitQuiz() {
+    const unanswered = ['q1','q2','q3','q4','q5'].filter(q => !confirmed[q]);
+    const subjText = document.getElementById('subj-answer').value.trim();
+
+    if (unanswered.length > 0) {
+      alert(`Please confirm your answer for: ${unanswered.join(', ').toUpperCase()}`);
+      return;
+    }
+    if (!subjText) {
+      alert('Please write your response to Q6 before submitting.');
+      return;
+    }
+
+    // Calculate MCQ score
+    let correct = 0, wrong = 0;
+    ['q1','q2','q3','q4','q5'].forEach(q => {
+      if (selected[q] === ANSWERS[q]) correct++;
+      else wrong++;
+    });
+
+    // Animate ring
+    const circumference = 283;
+    const pct = correct / 5;
+    document.getElementById('ringFill').style.strokeDashoffset = circumference - (circumference * pct);
+    document.getElementById('scoreText').textContent = `${correct}/5`;
+    document.getElementById('scoreCorrect').textContent = correct;
+    document.getElementById('scoreWrong').textContent = wrong;
+
+    // Subjective pending
+    const words = subjText.split(/\s+/).length;
+    document.getElementById('subjPending').innerHTML =
+      `📝 <strong>Q6 submitted</strong> (${words} words) — awaiting teacher review for up to 4 marks.`;
+
+    document.getElementById('scoreboard').style.display = 'block';
+    document.getElementById('submitBtn').disabled = true;
+    document.getElementById('progressBar').style.width = '100%';
+
+    document.getElementById('scoreboard').scrollIntoView({ behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>
